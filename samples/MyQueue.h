@@ -4,7 +4,7 @@ using namespace std;
 
 template<class T>
 class Queue{
-    int size;
+    int size;//размер буфера
     int start;
     int end;
     T* arr;
@@ -62,6 +62,8 @@ public:
     Queue<T>& operator=(Queue<T>&&q){
         if(*this == q)
             return *this;
+        if(size>0)
+            delete[]arr;
         arr = nullptr;
         start = end = size = 0;
         swap(*this,q);
