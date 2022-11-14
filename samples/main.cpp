@@ -1,23 +1,27 @@
 #include <iostream>
-#include "Sparse_Matrix.h"
+#include "MyQueue.h"
+
 using namespace std;
 int main() {
-    Sparse_Matrix<int>a(3);
-    Sparse_Matrix<int>b(3);
-    for(int i = 0;i<3;i++){
-        for(int j = 0;j<3;j++){
-            a.set(i,j,((i+j)*4)%3);
-            b.set(i,j,((i+j)*7)%4);
-        }
+    Queue<int>p(5);
+    int cnt = 0;
+    for(int i = 0;i<4;i++){
+        p.push(i+1);
+        cnt++;
+        cout<<"cnt =" <<cnt<<'\n';
+        cout<<p<<'\n';
     }
-    cout<<"a:\n";
-    cout<<a<<'\n';
-    cout<<'\n';
-    cout<<"b:\n";
-    cout<<b<<'\n';
-    cout<<'\n';
-    cout<<"c = a + b:\n";
-    Sparse_Matrix<int>c = a + b;
-    cout<<c<<'\n';
+    p.pop();
+    p.pop();
+    p.pop();
+    p.pop();
+    cnt-=4;
+    cout<<p<<'\n';
+    for(int i = 0;i<9;i++){
+        p.push(i+1);
+        cnt++;
+        cout<<"cnt =" <<cnt<<'\n';
+        cout<<p<<'\n';
+    }
     return 0;
 }
