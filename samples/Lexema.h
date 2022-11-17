@@ -1,7 +1,11 @@
+#pragma once
 #include<string>
 #include<iostream>
 #include<algorithm>
+#include <vector>
 #include "MyQueue.h"
+#include "MyStack.h"
+#include "map"
 using namespace std;
 
 enum TypeElement{
@@ -12,6 +16,14 @@ enum TypeElement{
     //float number?
 
 };
+
+int get_priority_operation(string c){
+    if(c == "*" || c == "/")
+        return 2;
+    if(c == "+" || c == "-")
+        return 1;
+    return 0;
+}
 
 class Lexema{
     TypeElement type;
@@ -24,6 +36,10 @@ public:
     string get_string(){
         return s;
     }
+    TypeElement get_type(){
+        return type;
+    }
+
     friend ostream& operator << (ostream& out, Lexema& p) {
         out << "{" << p.s << ", ";
         if (p.type == Operation) {
@@ -33,10 +49,71 @@ public:
             out << "number";
         };
         out << "}";
+        out<<"\n";
         return out;
     }
 };
 
+double calculate(vector<Lexema>&t){
+    //подается на вход обратная польская запись
+    Stack<double>stack;
+    for(Lexema& l : t){
+        if(l.get_type() == Operation){
+            double v1 = stack.pop();
+            double v2 = stack.pop();
+            if(l.get_string() == "+"){
+                stack.push(v2+v1);
+            }
+            if(l.get_string() == "-"){
+                stack.push(v2-v1);
+            }
+            if(l.get_string() == "*"){
+                stack.push(v2*v1);
+            }
+            if(l.get_string() == "/"){
+                stack.push(v2/v1);
+            }
+        }
+        else{
+            int val = stoi(l.get_string());
+            stack.push(val);
+        }
+    }
+    return stack.pop();
+}
+
+vector<Lexema> get_postfix(Queue<Lexema> operands){
+    vector<Lexema>ans;
+    Stack<Lexema>stack;
+    while(!operands.is_empty()){
+        Lexema t = operands.pop();
+        if(t.get_type() == number){
+            ans.push_back(t);
+        }
+        if(t.get_type() == Operation){
+            int priority = get_priority_operation(t.get_string());
+            while(!stack.is_empty()){
+                Lexema tmp = stack.top();
+                int tmp_priority = get_priority_operation(tmp.get_string());
+                if(tmp_priority == 0){
+                    stack.pop();
+                }
+                else if(tmp_priority >= priority){
+                    ans.push_back(tmp);
+                    stack.pop();
+                }
+                else
+                    break;
+            }
+            stack.push(t);
+        }
+    }
+    while(!stack.is_empty()){
+        Lexema tmp = stack.pop();
+        ans.push_back(tmp);
+    }
+    return ans;
+}
 Queue<Lexema> parser(string in){
     //стандартная версия парсера для чисел и операций
     Queue<Lexema>ans;
@@ -44,7 +121,7 @@ Queue<Lexema> parser(string in){
     string tmp = "";
     //Добавляем пробел, чтобы корректно обработался ввод строки в цикле
     in+=' ';
-    string operation = "/*+-";
+    string operation = "(/*+-)";
     string separator = " /n/t";
     for(char c :in){
         switch(state)
@@ -61,10 +138,11 @@ Queue<Lexema> parser(string in){
                     tmp = c;
                     Lexema l(tmp,Operation);
                     ans.push(l);
+                    tmp = "";
                     break;
                 }
             case 1:
-                if(c>=0 && c<=9){
+                if(c>='0' && c<='9'){
                     tmp+=c;
                     break;
                 }
@@ -80,8 +158,10 @@ Queue<Lexema> parser(string in){
                 }
                 if(count(separator.begin(),separator.end(),c) == 1){
                     //встретился сепаратор
+                    if(tmp == "")break;
                     Lexema l(tmp,number);
                     ans.push(l);
+                    tmp = "";
                     state = 0;
                     break;
                 }

@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 using namespace std;
@@ -25,7 +26,7 @@ class Queue{
         size = new_size;
     }
 public:
-    Queue(int _size = 1){
+    Queue(int _size = 2){
         size = _size;
         end = 0;
         start = next(end);
@@ -69,6 +70,16 @@ public:
         swap(*this,q);
         return *this;
     }
+    int get_size(){
+        if(is_empty())
+            return 0;
+        if(end < start){
+            return  size - start + end  +1;
+        }
+        else{
+            return end - start + 1;
+        }
+    }
     bool is_empty(){
         if(next(end) == start)
             return true;
@@ -86,6 +97,9 @@ public:
         }
         end = next(end);
         arr[end] = x;
+    }
+    T top(){
+        return arr[end];
     }
     T pop(){
         if(this->is_empty())

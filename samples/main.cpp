@@ -1,36 +1,14 @@
 #include <iostream>
-#include "MyQueue.h"
-#include "MyStack.h"
-
+#include "Lexema.h"
 using namespace std;
 int main() {
-    Queue<int>p(5);
-    for(int i = 0;i<4;i++){
-        p.push(i+1);
-        cout<<p<<'\n';
+
+    string s = "(123 + 10  *2 - 1)/20";
+    Queue<Lexema>q = parser(s);
+    vector<Lexema>t = get_postfix(q);
+    for(int i = 0;i<t.size();i++){
+        cout<<t[i];
     }
-    p.pop();
-    p.pop();
-    p.pop();
-    p.pop();
-    cout<<p<<'\n';
-    for(int i = 0;i<9;i++){
-        p.push(i+1);
-        cout<<p<<'\n';
-    }
-    //========================================
-    Stack<int>st(2);
-    for(int i = 0;i<5;i++){
-        st.push(i+1);
-    }
-    cout<<st<<'\n';
-    for(int i = 0;i<5;i++){
-        st.pop();
-    }
-    cout<<st<<'\n';
-    for(int i = 0;i<5;i++){
-        st.push(i+1+3);
-    }
-    cout<<st<<'\n';
+    cout<<calculate(t)<<'\n';
     return 0;
 }

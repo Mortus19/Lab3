@@ -1,4 +1,6 @@
+#pragma once
 #include <iostream>
+
 
 using namespace std;
 
@@ -10,15 +12,16 @@ class Stack{
     void repackage(){
         int new_size = size*2 + 5;
         T* tmp = new T[new_size]{};
-        for(int i = 0;i<cur;i++){
+        for(int i = 0;i<=cur;i++){
             tmp[i] = arr[i];
         }
-        delete []arr;
+        if(size > 0)
+            delete []arr;
         arr = tmp;
         size = new_size;
     }
 public:
-    Stack(int _size = 1){
+    Stack(int _size = 2){
         size = _size;cur = 0;
         arr = new T[size]{};
     }
@@ -63,9 +66,12 @@ public:
         return false;
     }
     bool is_full(){
-        if(cur == size)
+        if(cur == size-1)
             return true;
         return false;
+    }
+    int get_size(){
+        return cur;
     }
     void push(T x){
         if(this->is_full()){
@@ -75,10 +81,13 @@ public:
         arr[cur] = x;
         cur++;
     }
+    T top(){
+        return arr[cur-1];
+    }
     T pop(){
         if(this->is_empty())
             throw exception();
-        T v = arr[cur];cur--;
+        T v = arr[cur-1];cur--;
         return v;
     }
     ~Stack(){
