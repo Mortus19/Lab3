@@ -5,7 +5,7 @@
 #include <vector>
 #include "MyQueue.h"
 #include "MyStack.h"
-#include "map"
+#include <map>
 using namespace std;
 
 enum TypeElement{
@@ -14,10 +14,13 @@ enum TypeElement{
     number
     //function?
     //float number?
-
 };
 
 int get_priority_operation(string c){
+    if(c == "(")
+        return -1;
+    if(c == ")")
+        return -2;
     if(c == "*" || c == "/")
         return 2;
     if(c == "+" || c == "-")
@@ -64,13 +67,13 @@ double calculate(vector<Lexema>&t){
             if(l.get_string() == "+"){
                 stack.push(v2+v1);
             }
-            if(l.get_string() == "-"){
+            else if(l.get_string() == "-"){
                 stack.push(v2-v1);
             }
-            if(l.get_string() == "*"){
+            else if(l.get_string() == "*"){
                 stack.push(v2*v1);
             }
-            if(l.get_string() == "/"){
+            else{
                 stack.push(v2/v1);
             }
         }
@@ -90,27 +93,42 @@ vector<Lexema> get_postfix(Queue<Lexema> operands){
         if(t.get_type() == number){
             ans.push_back(t);
         }
-        if(t.get_type() == Operation){
+        else{
             int priority = get_priority_operation(t.get_string());
+            if(priority == -1){
+                //встретили открывающую скобку
+                stack.push(t);
+                continue;
+            }
             while(!stack.is_empty()){
                 Lexema tmp = stack.top();
                 int tmp_priority = get_priority_operation(tmp.get_string());
-                if(tmp_priority == 0){
+                if(priority == -2 && tmp_priority == -1){
+                    //если встретили закрывающую, то вычищаем все символы из стека до открывающей
                     stack.pop();
+                    break;
                 }
-                else if(tmp_priority >= priority){
+                else if(tmp_priority == -1)
+                    break;
+                string tmp_str = tmp.get_string();
+                if(tmp_priority >= priority){
                     ans.push_back(tmp);
                     stack.pop();
                 }
                 else
                     break;
             }
-            stack.push(t);
+            if(priority!=-2)
+                stack.push(t);
         }
     }
     while(!stack.is_empty()){
         Lexema tmp = stack.pop();
-        ans.push_back(tmp);
+        int tmp_priority = get_priority_operation(tmp.get_string());
+        if(tmp_priority > 0) {
+            //добавляем все символы из стека, которые не равны ( или )
+            ans.push_back(tmp);
+        }
     }
     return ans;
 }
@@ -154,6 +172,7 @@ Queue<Lexema> parser(string in){
                     Lexema t(tmp,Operation);
                     ans.push(t);
                     state = 0;
+                    tmp = "";
                     break;
                 }
                 if(count(separator.begin(),separator.end(),c) == 1){

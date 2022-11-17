@@ -19,6 +19,7 @@ class Queue{
             tmp[index] = arr[i];
             index++;
         }
+        if(size)
         delete []arr;
         arr = tmp;
         end = size-1;
@@ -26,7 +27,7 @@ class Queue{
         size = new_size;
     }
 public:
-    Queue(int _size = 2){
+    Queue(int _size = 1){
         size = _size;
         end = 0;
         start = next(end);

@@ -21,7 +21,7 @@ class Stack{
         size = new_size;
     }
 public:
-    Stack(int _size = 2){
+    Stack(int _size = 1){
         size = _size;cur = 0;
         arr = new T[size]{};
     }
