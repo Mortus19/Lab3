@@ -1,6 +1,7 @@
 #pragma once
 #include "Lexema.h"
 #include "Operations.h"
+#include "Exepcion.h"
 class Arifmetic{
     string in;
 public:
@@ -17,7 +18,8 @@ public:
         in+=' ';
         string operation = "(/*+-)^";
         string separator = " /n/t";
-        for(char c :in){
+        for(int i = 0;i<in.size();i++){
+            char c = in[i];
             switch(state)
             {
                 case 0:
@@ -26,7 +28,7 @@ public:
                         state = 1;
                         break;
                     }
-                    if(count(operation.begin(),operation.end(),c) == 1){
+                    else if(count(operation.begin(),operation.end(),c) == 1){
                         //встретился символ с операции
                         tmp = c;
                         Lexema l(tmp,Operation);
@@ -34,16 +36,29 @@ public:
                         tmp = "";
                         break;
                     }
+                    else if(count(separator.begin(),separator.end(),c) == 1){
+                        //встретился сепаратор
+                        state = 0;
+                        break;
+                    }
+                    else if(c == '.'){
+                        tmp+=c;
+                        state = 2;
+                        break;
+                    }
+                    else
+                        throw new Unknow_symbol(c,i+1);
                 case 1:
                     if(c>='0' && c<='9'){
                         tmp+=c;
                         break;
                     }
-                    if(c == '.'){
+                    else if(c == '.'){
                         tmp+=c;
                         state = 2;
+                        break;
                     }
-                    if(count(operation.begin(),operation.end(),c) == 1){
+                    else if(count(operation.begin(),operation.end(),c) == 1){
                         //встретился символ с операции
                         Lexema l(tmp,int_number);
                         ans.push(l);
@@ -54,7 +69,7 @@ public:
                         tmp = "";
                         break;
                     }
-                    if(count(separator.begin(),separator.end(),c) == 1){
+                    else if(count(separator.begin(),separator.end(),c) == 1){
                         //встретился сепаратор
                         if(tmp == "")break;
                         Lexema l(tmp,int_number);
@@ -62,13 +77,16 @@ public:
                         tmp = "";
                         state = 0;
                         break;
+                    }
+                    else {
+                        throw new Unknow_symbol(c,i+1);
                     }
                 case 2:
                     if(c>='0' && c<='9'){
                         tmp+=c;
                         break;
                     }
-                    if(count(operation.begin(),operation.end(),c) == 1){
+                    else if(count(operation.begin(),operation.end(),c) == 1){
                         //встретился символ с операции
                         Lexema l(tmp,double_number);
                         ans.push(l);
@@ -79,7 +97,7 @@ public:
                         tmp = "";
                         break;
                     }
-                    if(count(separator.begin(),separator.end(),c) == 1){
+                    else if(count(separator.begin(),separator.end(),c) == 1){
                         //встретился сепаратор
                         if(tmp == "")break;
                         Lexema l(tmp,double_number);
@@ -88,9 +106,12 @@ public:
                         state = 0;
                         break;
                     }
-                    break;
+                    else {
+                        throw new Unknow_symbol(c,i+1);
+                    }
             }
         }
+        in.pop_back();
         return ans;
     }
 
@@ -164,8 +185,9 @@ public:
     }
 
     double getans(){
-        Queue<Lexema> t = parser();
-        Queue<Lexema> postfix = get_postfix(t);
+        Queue<Lexema> lexems = parser();
+        cout<<lexems<<'\n';
+        Queue<Lexema> postfix = get_postfix(lexems);
         return calculate(postfix);
     }
 };

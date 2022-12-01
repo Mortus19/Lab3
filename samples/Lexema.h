@@ -33,16 +33,21 @@ int get_priority_operation(string c){
 class Lexema{
     TypeElement type;
     string s;
+    int pos;
 public:
-    Lexema(string _s = "" , TypeElement _type = none){
+    Lexema(string _s = "" , TypeElement _type = none,int index = -1){
         type = _type;
         s = _s;
+        pos = index;
     }
     string get_string(){
         return s;
     }
     TypeElement get_type(){
         return type;
+    }
+    int get_pos(){
+        return pos;
     }
     friend ostream& operator << (ostream& out, Lexema& p) {
         out << "{" << p.s << ", ";
@@ -54,6 +59,9 @@ public:
         }
         else if (p.type == double_number) {
             out << "double number";
+        }
+        else{
+            out<<"None";
         }
         out << "}";
         out<<"\n";
