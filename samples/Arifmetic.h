@@ -1,0 +1,135 @@
+#pragma once
+#include "Lexema.h"
+#include "Operations.h"
+class Arifmetic{
+    string in;
+    Queue<Lexema> lexems;
+public:
+    Queue<Lexema> parser(){
+        //Лексический анализ, выделяем лексемы
+        //стандартная версия парсера для чисел и операций
+        Queue<Lexema>ans;
+        int state = 0;
+        string tmp = "";
+        //Добавляем пробел, чтобы корректно обработался ввод строки в цикле
+        in+=' ';
+        string operation = "(/*+-)";
+        string separator = " /n/t";
+        for(char c :in){
+            switch(state)
+            {
+                case 0:
+                    //операция
+                    if(c>='0' && c<='9'){
+                        tmp = c;
+                        state = 1;
+                        break;
+                    }
+                    if(count(operation.begin(),operation.end(),c) == 1){
+                        //встретился символ с операции
+                        tmp = c;
+                        Lexema l(tmp,Operation);
+                        ans.push(l);
+                        tmp = "";
+                        break;
+                    }
+                case 1:
+                    if(c>='0' && c<='9'){
+                        tmp+=c;
+                        break;
+                    }
+                    if(count(operation.begin(),operation.end(),c) == 1){
+                        //встретился символ с операции
+                        Lexema l(tmp,number);
+                        ans.push(l);
+                        tmp = c;
+                        Lexema t(tmp,Operation);
+                        ans.push(t);
+                        state = 0;
+                        tmp = "";
+                        break;
+                    }
+                    if(count(separator.begin(),separator.end(),c) == 1){
+                        //встретился сепаратор
+                        if(tmp == "")break;
+                        Lexema l(tmp,number);
+                        ans.push(l);
+                        tmp = "";
+                        state = 0;
+                        break;
+                    }
+            }
+        }
+        return ans;
+    }
+
+    Queue<Lexema> get_postfix(Queue<Lexema> operands){
+        //Вычисляется обратная польская запись
+        Queue<Lexema>ans;
+        Stack<Lexema>stack;
+        while(!operands.is_empty()){
+            Lexema t = operands.pop();
+            if(t.get_type() == number){
+                ans.push(t);
+            }
+            else{
+                int priority = get_priority_operation(t.get_string());
+                if(priority == -1){
+                    //встретили открывающую скобку
+                    stack.push(t);
+                    continue;
+                }
+                while(!stack.is_empty()){
+                    Lexema tmp = stack.top();
+                    int tmp_priority = get_priority_operation(tmp.get_string());
+                    if(priority == -2 && tmp_priority == -1){
+                        //если встретили закрывающую, то вычищаем все символы из стека до открывающей
+                        stack.pop();
+                        break;
+                    }
+                    else if(tmp_priority == -1)
+                        break;
+                    if(tmp_priority >= priority){
+                        ans.push(tmp);
+                        stack.pop();
+                    }
+                    else
+                        break;
+                }
+                if(priority!=-2)
+                    stack.push(t);
+            }
+        }
+        while(!stack.is_empty()){
+            Lexema tmp = stack.pop();
+            int tmp_priority = get_priority_operation(tmp.get_string());
+            if(tmp_priority > 0) {
+                //добавляем все символы из стека, которые не равны ( или )
+                ans.push(tmp);
+            }
+        }
+        return ans;
+    }
+
+    double calculate(Queue<Lexema>t){
+        //подается на вход обратная польская запись
+        Stack<double>stack;
+        Operations * op;
+        while(!t.is_empty()){
+            Lexema l = t.pop();
+            if(l.get_type() == Operation){
+                double v1 = stack.pop();
+                double v2 = stack.pop();
+                op = get_operations(l.get_string());
+                stack.push(op->calc(v2,v1));
+            }
+            else{
+                int val = stoi(l.get_string());
+                stack.push(val);
+            }
+        }
+        return stack.pop();
+        //с помощью наследования использовать полиморфизм и перегрузить операции(вроде сделал)
+    }
+
+};
