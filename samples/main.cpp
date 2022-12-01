@@ -1,14 +1,12 @@
 #include <iostream>
-#include "Lexema.h"
+#include "Arifmetic.h"
 using namespace std;
 int main() {
-    string s = "((123 + 10*3 - 1)/(151 * 2)+(1 * 3))*20";
-    Queue<Lexema>q = parser(s);
-    vector<Lexema>t = get_postfix(q);
-    for(int i = 0;i<t.size();i++){
-        cout<<t[i];
-    }
-    cout<<calculate(t)<<'\n';
+//    string s = "((123 + 10*3 - 1)/(151 * 2)+(1 * 3))*20";
+    string s = "(0.21^2 - 0.21 ^ 3)/(12.23)";
+    Arifmetic a(s);
+    cout<<a.getans();
+
 
     /*
      что хочу добавить?

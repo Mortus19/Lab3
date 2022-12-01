@@ -3,8 +3,10 @@
 #include "Operations.h"
 class Arifmetic{
     string in;
-    Queue<Lexema> lexems;
 public:
+    Arifmetic(string t = ""){
+        in = t;
+    }
     Queue<Lexema> parser(){
         //Лексический анализ, выделяем лексемы
         //стандартная версия парсера для чисел и операций
@@ -13,13 +15,12 @@ public:
         string tmp = "";
         //Добавляем пробел, чтобы корректно обработался ввод строки в цикле
         in+=' ';
-        string operation = "(/*+-)";
+        string operation = "(/*+-)^";
         string separator = " /n/t";
         for(char c :in){
             switch(state)
             {
                 case 0:
-                    //операция
                     if(c>='0' && c<='9'){
                         tmp = c;
                         state = 1;
@@ -38,9 +39,13 @@ public:
                         tmp+=c;
                         break;
                     }
+                    if(c == '.'){
+                        tmp+=c;
+                        state = 2;
+                    }
                     if(count(operation.begin(),operation.end(),c) == 1){
                         //встретился символ с операции
-                        Lexema l(tmp,number);
+                        Lexema l(tmp,int_number);
                         ans.push(l);
                         tmp = c;
                         Lexema t(tmp,Operation);
@@ -52,12 +57,38 @@ public:
                     if(count(separator.begin(),separator.end(),c) == 1){
                         //встретился сепаратор
                         if(tmp == "")break;
-                        Lexema l(tmp,number);
+                        Lexema l(tmp,int_number);
                         ans.push(l);
                         tmp = "";
                         state = 0;
                         break;
                     }
+                case 2:
+                    if(c>='0' && c<='9'){
+                        tmp+=c;
+                        break;
+                    }
+                    if(count(operation.begin(),operation.end(),c) == 1){
+                        //встретился символ с операции
+                        Lexema l(tmp,double_number);
+                        ans.push(l);
+                        tmp = c;
+                        Lexema t(tmp,Operation);
+                        ans.push(t);
+                        state = 0;
+                        tmp = "";
+                        break;
+                    }
+                    if(count(separator.begin(),separator.end(),c) == 1){
+                        //встретился сепаратор
+                        if(tmp == "")break;
+                        Lexema l(tmp,double_number);
+                        ans.push(l);
+                        tmp = "";
+                        state = 0;
+                        break;
+                    }
+                    break;
             }
         }
         return ans;
@@ -69,7 +100,7 @@ public:
         Stack<Lexema>stack;
         while(!operands.is_empty()){
             Lexema t = operands.pop();
-            if(t.get_type() == number){
+            if(t.get_type() != Operation){
                 ans.push(t);
             }
             else{
@@ -114,7 +145,7 @@ public:
     double calculate(Queue<Lexema>t){
         //подается на вход обратная польская запись
         Stack<double>stack;
-        Operations * op;
+        Operations* op;
         while(!t.is_empty()){
             Lexema l = t.pop();
             if(l.get_type() == Operation){
@@ -123,8 +154,8 @@ public:
                 op = get_operations(l.get_string());
                 stack.push(op->calc(v2,v1));
             }
-            else{
-                int val = stoi(l.get_string());
+            else {
+                double val = stod(l.get_string());
                 stack.push(val);
             }
         }
@@ -132,4 +163,9 @@ public:
         //с помощью наследования использовать полиморфизм и перегрузить операции(вроде сделал)
     }
 
+    double getans(){
+        Queue<Lexema> t = parser();
+        Queue<Lexema> postfix = get_postfix(t);
+        return calculate(postfix);
+    }
 };

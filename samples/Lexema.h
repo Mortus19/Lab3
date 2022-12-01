@@ -11,9 +11,9 @@ using namespace std;
 enum TypeElement{
     none,
     Operation,
-    number
+    int_number,
+    double_number
     //function?
-    //float number?
 };
 
 int get_priority_operation(string c){
@@ -21,6 +21,8 @@ int get_priority_operation(string c){
         return -1;
     if(c == ")")
         return -2;
+    if(c == "^")
+        return 3;
     if(c == "*" || c == "/")
         return 2;
     if(c == "+" || c == "-")
@@ -47,9 +49,12 @@ public:
         if (p.type == Operation) {
             out << "operation";
         }
-        else if (p.type == number) {
-            out << "number";
-        };
+        else if (p.type == int_number) {
+            out << "int number";
+        }
+        else if (p.type == double_number) {
+            out << "double number";
+        }
         out << "}";
         out<<"\n";
         return out;
